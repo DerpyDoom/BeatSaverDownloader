@@ -21,7 +21,7 @@ namespace BeatSaverDownloader
         TextMeshProUGUI _inputText;
         public string _inputString;
 
-        protected override void DidActivate()
+        protected override void DidActivate(bool firstActivation, ActivationType activationType)
         {
             _parentMasterViewController = transform.parent.GetComponent<BeatSaverMasterViewController>();
             ui = BeatSaverUI._instance;
@@ -59,7 +59,7 @@ namespace BeatSaverDownloader
             }
 
 
-            base.DidActivate();
+            base.DidActivate(firstActivation, activationType);
         }
 
         void UpdateInputText()

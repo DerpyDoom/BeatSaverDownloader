@@ -39,7 +39,7 @@ namespace BeatSaverDownloader
         public int _songsPerPage = 6;
 
 
-        protected override void DidActivate()
+        protected override void DidActivate(bool firstActivation, ActivationType activationType)
         {
             ui = BeatSaverUI._instance;
             _parentMasterViewController = transform.parent.GetComponent<BeatSaverMasterViewController>();
@@ -227,7 +227,7 @@ namespace BeatSaverDownloader
                     (_songsTableView.transform as RectTransform).position = new Vector3(0f, 0f, 2.4f);
                     (_songsTableView.transform as RectTransform).anchoredPosition = new Vector3(0f, -3f);
 
-                    _songsTableView.DidSelectRowEvent += _songsTableView_DidSelectRowEvent;
+                    _songsTableView.didSelectRowEvent += _songsTableView_DidSelectRowEvent;
                     
                 }
                 else
@@ -245,11 +245,11 @@ namespace BeatSaverDownloader
 
         }
 
-        protected override void DidDeactivate()
+        protected override void DidDeactivate(DeactivationType deactivationType)
         {
             
             
-            base.DidDeactivate();
+            base.DidDeactivate(deactivationType);
 
 
         }

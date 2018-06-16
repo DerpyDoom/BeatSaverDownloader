@@ -105,6 +105,7 @@
   <ItemGroup>
     <Compile Include="BeatSaverAPIResult.cs" />
     <Compile Include="BeatSaverMasterViewController.cs" />
+    <Compile Include="BeatSaverSongDetailViewController.cs" />
     <Compile Include="BeatSaverSongListViewController.cs" />
     <Compile Include="HTML5Decode.cs" />
     <Compile Include="ICSharpCode.SharpZipLib\Checksum\Adler32.cs" />

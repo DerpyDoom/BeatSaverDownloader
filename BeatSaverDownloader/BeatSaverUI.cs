@@ -84,7 +84,7 @@ namespace BeatSaverDownloader
 
                 SetButtonText(ref _beatSaverButton, "BeatSaver");
 
-                SetButtonIcon(ref _beatSaverButton, icons.First(x => (x.name == "SettingsIcon")));
+                //SetButtonIcon(ref _beatSaverButton, icons.First(x => (x.name == "SettingsIcon")));
                 
                 _beatSaverButton.onClick.AddListener(delegate () {
 
