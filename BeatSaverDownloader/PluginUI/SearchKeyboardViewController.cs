@@ -7,12 +7,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRUI;
 
-namespace BeatSaverDownloader
+namespace BeatSaverDownloader.PluginUI
 {
     class SearchKeyboardViewController : VRUIViewController
     {
         BeatSaverMasterViewController _parentMasterViewController;
-        BeatSaverUI ui;
 
         UIKeyboard _searchKeyboard;
 
@@ -24,7 +23,6 @@ namespace BeatSaverDownloader
         protected override void DidActivate(bool firstActivation, ActivationType activationType)
         {
             _parentMasterViewController = transform.parent.GetComponent<BeatSaverMasterViewController>();
-            ui = BeatSaverUI._instance;
 
             if (_searchKeyboard == null)
             {
@@ -35,7 +33,7 @@ namespace BeatSaverDownloader
 
             if(_inputText == null)
             {
-                _inputText = ui.CreateText(rectTransform,"Search...", new Vector2(0f,-17.5f));
+                _inputText = BeatSaberUI.CreateText(rectTransform,"Search...", new Vector2(0f,-17.5f));
                 _inputText.alignment = TextAlignmentOptions.Center;
                 _inputText.fontSize = 6f;
             }
@@ -47,8 +45,8 @@ namespace BeatSaverDownloader
 
             if(_searchButton == null)
             {
-                _searchButton = ui.CreateUIButton(rectTransform, "ApplyButton");
-                ui.SetButtonText(ref _searchButton, "Submit");
+                _searchButton = BeatSaberUI.CreateUIButton(rectTransform, "ApplyButton");
+                BeatSaberUI.SetButtonText(ref _searchButton, "Submit");
                 (_searchButton.transform as RectTransform).sizeDelta = new Vector2(30f, 10f);
                 (_searchButton.transform as RectTransform).anchoredPosition = new Vector2(-15f, 5f);
                 _searchButton.onClick.RemoveAllListeners();

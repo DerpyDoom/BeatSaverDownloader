@@ -8,13 +8,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRUI;
 
-namespace BeatSaverDownloader
+namespace BeatSaverDownloader.PluginUI
 {
     enum TopButtonsState { Select, SortBy, Search };
     class BeatSaverSongListViewController : VRUIViewController, TableView.IDataSource
     {
         BeatSaverMasterViewController _parentMasterViewController;
-        BeatSaverUI ui;
+        
         private Logger log = new Logger("BeatSaverDownloader");
 
         public Button _pageUpButton;
@@ -41,10 +41,9 @@ namespace BeatSaverDownloader
 
         protected override void DidActivate(bool firstActivation, ActivationType activationType)
         {
-            ui = BeatSaverUI._instance;
-            _parentMasterViewController = transform.parent.GetComponent<BeatSaverMasterViewController>();
+            _parentMasterViewController = GetComponentInParent<BeatSaverMasterViewController>();
 
-            try
+            if (firstActivation)
             {
                 if (_pageUpButton == null)
                 {
@@ -91,13 +90,14 @@ namespace BeatSaverDownloader
 
                 if (_sortByButton == null)
                 {
-                    _sortByButton = ui.CreateUIButton(rectTransform, "ApplyButton");
-                    ui.SetButtonText(ref _sortByButton, "Sort by");
-                    ui.SetButtonTextSize(ref _sortByButton, 3f);
+                    _sortByButton = BeatSaberUI.CreateUIButton(rectTransform, "ApplyButton");
+                    BeatSaberUI.SetButtonText(ref _sortByButton, "Sort by");
+                    BeatSaberUI.SetButtonTextSize(ref _sortByButton, 3f);
                     (_sortByButton.transform as RectTransform).sizeDelta = new Vector2(30f, 6f);
                     (_sortByButton.transform as RectTransform).anchoredPosition = new Vector2(0f, 73f);
                     _sortByButton.onClick.RemoveAllListeners();
-                    _sortByButton.onClick.AddListener(delegate () {
+                    _sortByButton.onClick.AddListener(delegate ()
+                    {
                         SelectTopButtons(TopButtonsState.SortBy);
                     });
 
@@ -105,21 +105,22 @@ namespace BeatSaverDownloader
 
                 if (_sortByText == null)
                 {
-                    _sortByText = ui.CreateText(rectTransform,"SORT BY", new Vector2(-36f,-4.75f));
+                    _sortByText = BeatSaberUI.CreateText(rectTransform, "SORT BY", new Vector2(-36f, -4.75f));
                     _sortByText.fontSize = 3.5f;
-                    _sortByText.rectTransform.sizeDelta = new Vector2(10f,6f);
+                    _sortByText.rectTransform.sizeDelta = new Vector2(10f, 6f);
                     _sortByText.gameObject.SetActive(false);
                 }
 
                 if (_topButton == null)
                 {
-                    _topButton = ui.CreateUIButton(rectTransform, "ApplyButton");
-                    ui.SetButtonText(ref _topButton, "Downloads");
-                    ui.SetButtonTextSize(ref _topButton, 3f);
+                    _topButton = BeatSaberUI.CreateUIButton(rectTransform, "ApplyButton");
+                    BeatSaberUI.SetButtonText(ref _topButton, "Downloads");
+                    BeatSaberUI.SetButtonTextSize(ref _topButton, 3f);
                     (_topButton.transform as RectTransform).sizeDelta = new Vector2(20f, 6f);
                     (_topButton.transform as RectTransform).anchoredPosition = new Vector2(-30f, 73f);
                     _topButton.onClick.RemoveAllListeners();
-                    _topButton.onClick.AddListener(delegate() {
+                    _topButton.onClick.AddListener(delegate ()
+                    {
                         if (!_parentMasterViewController._loading)
                         {
                             _parentMasterViewController._loading = true;
@@ -135,13 +136,14 @@ namespace BeatSaverDownloader
 
                 if (_newButton == null)
                 {
-                    _newButton = ui.CreateUIButton(rectTransform, "ApplyButton");
-                    ui.SetButtonText(ref _newButton, "Upload Time");
-                    ui.SetButtonTextSize(ref _newButton, 3f);
+                    _newButton = BeatSaberUI.CreateUIButton(rectTransform, "ApplyButton");
+                    BeatSaberUI.SetButtonText(ref _newButton, "Upload Time");
+                    BeatSaberUI.SetButtonTextSize(ref _newButton, 3f);
                     (_newButton.transform as RectTransform).sizeDelta = new Vector2(20f, 6f);
                     (_newButton.transform as RectTransform).anchoredPosition = new Vector2(-10f, 73f);
                     _newButton.onClick.RemoveAllListeners();
-                    _newButton.onClick.AddListener(delegate () {
+                    _newButton.onClick.AddListener(delegate ()
+                    {
                         if (!_parentMasterViewController._loading)
                         {
                             _parentMasterViewController._loading = true;
@@ -158,13 +160,14 @@ namespace BeatSaverDownloader
 
                 if (_starButton == null)
                 {
-                    _starButton = ui.CreateUIButton(rectTransform, "ApplyButton");
-                    ui.SetButtonText(ref _starButton, "Plays");
-                    ui.SetButtonTextSize(ref _starButton, 3f);
+                    _starButton = BeatSaberUI.CreateUIButton(rectTransform, "ApplyButton");
+                    BeatSaberUI.SetButtonText(ref _starButton, "Plays");
+                    BeatSaberUI.SetButtonTextSize(ref _starButton, 3f);
                     (_starButton.transform as RectTransform).sizeDelta = new Vector2(20f, 6f);
                     (_starButton.transform as RectTransform).anchoredPosition = new Vector2(10f, 73f);
                     _starButton.onClick.RemoveAllListeners();
-                    _starButton.onClick.AddListener(delegate () {
+                    _starButton.onClick.AddListener(delegate ()
+                    {
                         if (!_parentMasterViewController._loading)
                         {
                             _parentMasterViewController._sortBy = "plays";
@@ -177,15 +180,16 @@ namespace BeatSaverDownloader
                     _starButton.gameObject.SetActive(false);
                 }
 
-                if(_searchButton == null)
+                if (_searchButton == null)
                 {
-                    _searchButton = ui.CreateUIButton(rectTransform, "ApplyButton");
-                    ui.SetButtonText(ref _searchButton, "Search");
-                    ui.SetButtonTextSize(ref _searchButton, 3f);
+                    _searchButton = BeatSaberUI.CreateUIButton(rectTransform, "ApplyButton");
+                    BeatSaberUI.SetButtonText(ref _searchButton, "Search");
+                    BeatSaberUI.SetButtonTextSize(ref _searchButton, 3f);
                     (_searchButton.transform as RectTransform).sizeDelta = new Vector2(30f, 6f);
                     (_searchButton.transform as RectTransform).anchoredPosition = new Vector2(-30f, 73f);
                     _searchButton.onClick.RemoveAllListeners();
-                    _searchButton.onClick.AddListener(delegate () {
+                    _searchButton.onClick.AddListener(delegate ()
+                    {
                         _parentMasterViewController.ShowSearchKeyboard();
                         SelectTopButtons(TopButtonsState.Search);
                         _currentPage = 0;
@@ -193,23 +197,24 @@ namespace BeatSaverDownloader
                     });
                 }
 
-                
-                if(_loadingIndicator == null)
+
+                if (_loadingIndicator == null)
                 {
                     try
                     {
-                        _loadingIndicator = ui.CreateLoadingIndicator(rectTransform);
+                        _loadingIndicator = BeatSaberUI.CreateLoadingIndicator(rectTransform);
                         (_loadingIndicator.transform as RectTransform).anchorMin = new Vector2(0.5f, 0.5f);
                         (_loadingIndicator.transform as RectTransform).anchorMax = new Vector2(0.5f, 0.5f);
                         (_loadingIndicator.transform as RectTransform).anchoredPosition = new Vector2(0f, 0f);
                         _loadingIndicator.SetActive(true);
 
-                    }catch(Exception e)
+                    }
+                    catch (Exception e)
                     {
-                        log.Exception("EXCEPTION: "+e);
+                        log.Exception("EXCEPTION: " + e);
                     }
                 }
-                
+
 
                 _songListTableCellInstance = Resources.FindObjectsOfTypeAll<SongListTableCell>().First(x => (x.name == "SongListTableCell"));
 
@@ -228,38 +233,22 @@ namespace BeatSaverDownloader
                     (_songsTableView.transform as RectTransform).anchoredPosition = new Vector3(0f, -3f);
 
                     _songsTableView.didSelectRowEvent += _songsTableView_DidSelectRowEvent;
-                    
+
                 }
                 else
                 {
                     _songsTableView.ReloadData();
                 }
-
+            }
                 
-
-            }
-            catch (Exception e)
-            {
-                log.Exception("EXCEPTION IN DidActivate: " + e);
-            }
+                
 
         }
 
         protected override void DidDeactivate(DeactivationType deactivationType)
-        {
-            
-            
+        {            
             base.DidDeactivate(deactivationType);
-
-
         }
-
-        public void RefreshScreen()
-        {
-            _songsTableView.ReloadData();
-            
-        }
-
 
         public void SelectTopButtons(TopButtonsState _newState)
         {
@@ -351,7 +340,7 @@ namespace BeatSaverDownloader
                 }
                 foreach (TextMeshProUGUI text in _tableCell.GetComponentsInChildren<TextMeshProUGUI>())
                 {
-                    text.faceColor = new Color32(255,255,255,50);
+                    text.faceColor = new Color(1f, 1f, 1f, 0.2f);
                 }
 
 

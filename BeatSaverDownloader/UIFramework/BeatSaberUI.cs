@@ -14,36 +14,33 @@ using Image = UnityEngine.UI.Image;
 
 namespace BeatSaverDownloader
 {
-    class BeatSaverUI : MonoBehaviour
+    class BeatSaberUI : MonoBehaviour
     {
-        private Logger log = new Logger("BeatSaverDownloader");
-
-        private RectTransform _mainMenuRectTransform;
-        private MainMenuViewController _mainMenuViewController;
 
         private Button _buttonInstance;
         private Button _backButtonInstance;
         private GameObject _loadingIndicatorInstance;
 
-        public static BeatSaverUI _instance;
+        public static BeatSaberUI _instance;
 
         public static List<Sprite> icons = new List<Sprite>();
 
-        public BeatSaverMasterViewController _beatSaverViewController;
-        
+        public static bool initialized = false;
+
         internal static void OnLoad()
         {
             if (_instance != null)
             {
                 return;
             }
-            new GameObject("BeatSaver UI").AddComponent<BeatSaverUI>();
+            new GameObject("BeatSaber Custom UI").AddComponent<BeatSaberUI>();
 
         }
 
         private void Awake()
         {
             _instance = this;
+
             foreach (Sprite sprite in Resources.FindObjectsOfTypeAll<Sprite>())
             {
                 icons.Add(sprite);
@@ -52,71 +49,20 @@ namespace BeatSaverDownloader
             {
                 _buttonInstance = Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "QuitButton"));
                 _backButtonInstance = Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "BackArrowButton"));
-                _mainMenuViewController = Resources.FindObjectsOfTypeAll<MainMenuViewController>().First();
-                _mainMenuRectTransform = _buttonInstance.transform.parent as RectTransform;
                 _loadingIndicatorInstance = Resources.FindObjectsOfTypeAll<GameObject>().Where(x => x.name == "LoadingIndicator").First();
             }
             catch(Exception e)
             {
-                log.Exception("EXCEPTION ON AWAKE(TRY FIND BUTTONS): "+e);
+                Console.WriteLine($"EXCEPTION ON AWAKE(TRY FIND BUTTONS): {e}");
             }
 
-            try
-            {
-                CreateBeatSaverButton();
-            }
-            catch (Exception e)
-            {
-                log.Exception("EXCEPTION ON AWAKE(TRY CREATE BUTTON): " + e);
-            }
+            initialized = true;
             
-        }        
+        }       
 
-        private void CreateBeatSaverButton()
+        public static Button CreateUIButton(RectTransform parent, string buttonTemplate)
         {
-            
-            Button _beatSaverButton = CreateUIButton(_mainMenuRectTransform, "QuitButton");
-            
-            try
-            {
-                (_beatSaverButton.transform as RectTransform).anchoredPosition = new Vector2(30f, 7f);
-                (_beatSaverButton.transform as RectTransform).sizeDelta = new Vector2(28f, 10f);
-
-                SetButtonText(ref _beatSaverButton, "BeatSaver");
-
-                //SetButtonIcon(ref _beatSaverButton, icons.First(x => (x.name == "SettingsIcon")));
-                
-                _beatSaverButton.onClick.AddListener(delegate () {
-
-                    try
-                    {
-                        if (_beatSaverViewController == null)
-                        {
-                            _beatSaverViewController = CreateViewController<BeatSaverMasterViewController>();    
-                        }
-                        _mainMenuViewController.PresentModalViewController(_beatSaverViewController, null, false);
-                        
-                    }
-                    catch (Exception e)
-                    {
-                        log.Exception("EXCETPION IN BUTTON: "+e.Message);
-                    }
-
-                });
-
-            }
-            catch(Exception e)
-            {
-                log.Exception("EXCEPTION: "+e.Message);
-            }
-
-        }
-
-       
-
-        public Button CreateUIButton(RectTransform parent, string buttonTemplate)
-        {
-            if (_buttonInstance == null)
+            if (_instance._buttonInstance == null)
             {
                 return null;
             }
@@ -128,21 +74,21 @@ namespace BeatSaverDownloader
             return btn;
         }
 
-        public Button CreateBackButton(RectTransform parent)
+        public static Button CreateBackButton(RectTransform parent)
         {
-            if (_backButtonInstance == null)
+            if (_instance._backButtonInstance == null)
             {
                 return null;
             }
 
-            Button _button = Instantiate(_backButtonInstance, parent, false);
+            Button _button = Instantiate(_instance._backButtonInstance, parent, false);
             DestroyImmediate(_button.GetComponent<GameEventOnUIButtonClick>());
             _button.onClick = new Button.ButtonClickedEvent();
 
             return _button;
         }
 
-        public T CreateViewController<T>() where T : VRUIViewController
+        public static T CreateViewController<T>() where T : VRUIViewController
         {
             T vc = new GameObject("CreatedViewController").AddComponent<T>();
 
@@ -154,13 +100,13 @@ namespace BeatSaverDownloader
             return vc;
         }
 
-        public GameObject CreateLoadingIndicator(Transform parent)
+        public static GameObject CreateLoadingIndicator(Transform parent)
         {
-            GameObject indicator = Instantiate(_loadingIndicatorInstance, parent, false);
+            GameObject indicator = Instantiate(_instance._loadingIndicatorInstance, parent, false);
             return indicator;
         }
 
-        public TextMeshProUGUI CreateText(RectTransform parent, string text, Vector2 position)
+        public static TextMeshProUGUI CreateText(RectTransform parent, string text, Vector2 position)
         {
             TextMeshProUGUI textMesh = new GameObject("TextMeshProUGUI_GO").AddComponent<TextMeshProUGUI>();
             textMesh.rectTransform.SetParent(parent, false);
@@ -176,7 +122,7 @@ namespace BeatSaverDownloader
             return textMesh;
         }
 
-        public void SetButtonText(ref Button _button, string _text)
+        public static void SetButtonText(ref Button _button, string _text)
         {
             if (_button.GetComponentInChildren<TextMeshProUGUI>() != null)
             {
@@ -186,7 +132,7 @@ namespace BeatSaverDownloader
 
         }
 
-        public void SetButtonTextSize(ref Button _button, float _fontSize)
+        public static void SetButtonTextSize(ref Button _button, float _fontSize)
         {
             if (_button.GetComponentInChildren<TextMeshProUGUI>() != null)
             {
@@ -196,7 +142,7 @@ namespace BeatSaverDownloader
 
         }
 
-        public void SetButtonIcon(ref Button _button, Sprite _icon)
+        public static void SetButtonIcon(ref Button _button, Sprite _icon)
         {
             if (_button.GetComponentsInChildren<UnityEngine.UI.Image>().Count() > 1)
             {
@@ -206,7 +152,7 @@ namespace BeatSaverDownloader
 
         }
 
-        public void SetButtonBackground(ref Button _button, Sprite _background)
+        public static void SetButtonBackground(ref Button _button, Sprite _background)
         {
             if (_button.GetComponentsInChildren<Image>().Any())
             {
