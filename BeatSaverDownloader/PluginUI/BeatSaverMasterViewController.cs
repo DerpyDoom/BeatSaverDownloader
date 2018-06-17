@@ -49,15 +49,19 @@ namespace BeatSaverDownloader.PluginUI
         
         Prompt _confirmDeleteState = Prompt.NotSelected;
 
+        LevelCollectionsForGameplayModes _levelCollections;
+        List<LevelCollectionsForGameplayModes.LevelCollectionForGameplayMode> _levelCollectionsForGameModes;
+
         protected override void DidActivate(bool firstActivation, ActivationType activationType)
         {    
             _songLoader = FindObjectOfType<SongLoader>();
 
             UpdateAlreadyDownloadedSongs();
 
+            _levelCollections = Resources.FindObjectsOfTypeAll<LevelCollectionsForGameplayModes>().FirstOrDefault();
+            _levelCollectionsForGameModes = ReflectionUtil.GetPrivateField<LevelCollectionsForGameplayModes.LevelCollectionForGameplayMode[]>(_levelCollections, "_collections").ToList();
 
-
-            if(_songPreviewPlayer == null)
+            if (_songPreviewPlayer == null)
             {
                 ObjectProvider[] providers = Resources.FindObjectsOfTypeAll<ObjectProvider>().Where(x => x.name == "SongPreviewPlayerProvider").ToArray();
 
@@ -91,7 +95,7 @@ namespace BeatSaverDownloader.PluginUI
 
                 _backButton.onClick.AddListener(delegate ()
                 {
-                    if (!_loading)
+                    if (!_loading && (_downloadQueueViewController == null || _downloadQueueViewController._queuedSongs.Count == 0))
                     {
                         if (_songPreviewPlayer != null)
                         {
@@ -270,7 +274,7 @@ namespace BeatSaverDownloader.PluginUI
             if (www.isNetworkError || www.isHttpError)
             {
                 log.Error(www.error);
-                TextMeshProUGUI _errorText = BeatSaberUI.CreateText(_songDetailViewController.rectTransform, String.Format(www.error), new Vector2(18f, -64f));
+                TextMeshProUGUI _errorText = BeatSaberUI.CreateText(_songDetailViewController.rectTransform, www.error, new Vector2(18f, -64f));
                 Destroy(_errorText.gameObject, 2f);
             }
             else
@@ -355,13 +359,13 @@ namespace BeatSaverDownloader.PluginUI
             
         }
 
-        IEnumerator DeleteSong(int row)
+        IEnumerator DeleteSong(Song _songInfo)
         {
             bool zippedSong = false;
             _loading = true;
             _downloadButton.interactable = false;
 
-            string _songPath = GetDownloadedSongPath(_songs[row]);
+            string _songPath = GetDownloadedSongPath(_songInfo);
 
             if (!string.IsNullOrEmpty(_songPath) && _songPath.Contains("/.cache/"))
             {
@@ -435,8 +439,8 @@ namespace BeatSaverDownloader.PluginUI
 
             UpdateAlreadyDownloadedSongs();
             _songListViewController._songsTableView.ReloadData();
-            _songListViewController._songsTableView.SelectRow(row);
-            RefreshDetails(row);
+            _songListViewController._songsTableView.SelectRow(_selectedRow);
+            RefreshDetails(_selectedRow);
 
             _loading = false;
             _downloadButton.interactable = true;
@@ -611,7 +615,7 @@ namespace BeatSaverDownloader.PluginUI
                 {
                     if (!_loading)
                     {
-                        StartCoroutine(DeleteSong(row));
+                        StartCoroutine(DeleteSong(_songs[row]));
                     }
 
                 });
@@ -623,7 +627,7 @@ namespace BeatSaverDownloader.PluginUI
 
                 string _songPath = GetDownloadedSongPath(_songs[row]);
                 
-                if (!string.IsNullOrEmpty(_songPath) && _songPath.Contains("/.cache/"))
+                if (!string.IsNullOrEmpty(_songPath))
                 {
                     _downloadButton.interactable = false;
                 }
@@ -751,12 +755,14 @@ namespace BeatSaverDownloader.PluginUI
 
         public LevelStaticData GetLevelStaticDataForSong(Song _song)
         {
-            foreach(CustomLevelStaticData data in SongLoader.CustomLevelStaticDatas)
+            foreach(LevelCollectionsForGameplayModes.LevelCollectionForGameplayMode levelCollection in _levelCollectionsForGameModes)
             {
-                log.Log($"Comparing {data.songName} and {_song.songName}");
-                if ((new Song(data)).Compare(_song))
+                foreach(LevelStaticData data in levelCollection.levelCollection.levelsData)
                 {
-                    return data;
+                    if ((new Song(data)).Compare(_song))
+                    {
+                        return data;
+                    }
                 }
             }
             

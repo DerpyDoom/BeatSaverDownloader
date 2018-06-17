@@ -150,6 +150,14 @@ namespace BeatSaverDownloader
             path = _song.path;
         }
 
+        public Song(LevelStaticData _data)
+        {
+            songName = _data.songName;
+            songSubName = _data.songSubName;
+            authorName = _data.authorName;
+            difficultyLevels = ConvertDifficultyLevels(_data.difficultyLevels);
+        }
+
         public DifficultyLevel[] ConvertDifficultyLevels(CustomSongInfo.DifficultyLevel[] _difficultyLevels)
         {
             if (_difficultyLevels != null && _difficultyLevels.Length > 0)
