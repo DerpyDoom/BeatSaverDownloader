@@ -49,17 +49,12 @@ namespace BeatSaverDownloader.PluginUI
         
         Prompt _confirmDeleteState = Prompt.NotSelected;
 
-        LevelCollectionsForGameplayModes _levelCollections;
-        List<LevelCollectionsForGameplayModes.LevelCollectionForGameplayMode> _levelCollectionsForGameModes;
-
         protected override void DidActivate(bool firstActivation, ActivationType activationType)
         {    
             _songLoader = FindObjectOfType<SongLoader>();
 
             UpdateAlreadyDownloadedSongs();
 
-            _levelCollections = Resources.FindObjectsOfTypeAll<LevelCollectionsForGameplayModes>().FirstOrDefault();
-            _levelCollectionsForGameModes = ReflectionUtil.GetPrivateField<LevelCollectionsForGameplayModes.LevelCollectionForGameplayMode[]>(_levelCollections, "_collections").ToList();
 
             if (_songPreviewPlayer == null)
             {
@@ -413,7 +408,7 @@ namespace BeatSaverDownloader.PluginUI
 
                     foreach (string file in Directory.GetFiles(customSongsPath, "*.zip"))
                     {
-                        if(CreateMD5FromFile(file,out hash))
+                        if(PluginUI.CreateMD5FromFile(file,out hash))
                         {
                             if (hash == songHash)
                             {
@@ -755,7 +750,7 @@ namespace BeatSaverDownloader.PluginUI
 
         public LevelStaticData GetLevelStaticDataForSong(Song _song)
         {
-            foreach(LevelCollectionsForGameplayModes.LevelCollectionForGameplayMode levelCollection in _levelCollectionsForGameModes)
+            foreach(LevelCollectionsForGameplayModes.LevelCollectionForGameplayMode levelCollection in PluginUI._levelCollectionsForGameModes)
             {
                 foreach(LevelStaticData data in levelCollection.levelCollection.levelsData)
                 {
@@ -872,28 +867,6 @@ namespace BeatSaverDownloader.PluginUI
             }
             songInfo.difficultyLevels = diffLevels.ToArray();
             return songInfo;
-        }
-
-        public static bool CreateMD5FromFile(string path, out string hash)
-        {
-            hash = "";
-            if (!File.Exists(path)) return false;
-            using (var md5 = MD5.Create())
-            {
-                using (var stream = File.OpenRead(path))
-                {
-                    var hashBytes = md5.ComputeHash(stream);
-                    
-                    var sb = new StringBuilder();
-                    foreach (var hashByte in hashBytes)
-                    {
-                        sb.Append(hashByte.ToString("X2"));
-                    }
-
-                    hash = sb.ToString();
-                    return true;
-                }
-            }
         }
 
     }
