@@ -168,7 +168,7 @@ namespace BeatSaverDownloader.PluginUI
                 _favButton.onClick.RemoveAllListeners();
                 _favButton.onClick.AddListener(delegate ()
                 {
-                    if (PluginConfig.favouriteSongs.Contains(_songDetailViewController.difficultyLevel.level.levelId))
+                    if(PluginConfig.favouriteSongs.Contains(_songDetailViewController.difficultyLevel.level.levelId))
                     {
 
                         PluginConfig.favouriteSongs.Remove(_songDetailViewController.difficultyLevel.level.levelId);
@@ -177,6 +177,8 @@ namespace BeatSaverDownloader.PluginUI
                     {
                         PluginConfig.favouriteSongs.Add(_songDetailViewController.difficultyLevel.level.levelId);
                     }
+                    BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(_songDetailViewController.difficultyLevel.level.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
+                    PluginConfig.SaveConfig();
                 });
             }
             else
@@ -190,14 +192,13 @@ namespace BeatSaverDownloader.PluginUI
                     {
 
                         PluginConfig.favouriteSongs.Remove(_songDetailViewController.difficultyLevel.level.levelId);
-                        PluginConfig.SaveConfig();
                     }
                     else
                     {
                         PluginConfig.favouriteSongs.Add(_songDetailViewController.difficultyLevel.level.levelId);
-                        PluginConfig.SaveConfig();
                     }
                     BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(_songDetailViewController.difficultyLevel.level.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
+                    PluginConfig.SaveConfig();
                 });
             }
 
@@ -282,13 +283,13 @@ namespace BeatSaverDownloader.PluginUI
                     {
 
                         PluginConfig.favouriteSongs.Remove(selectedLevel.levelId);
-                        PluginConfig.SaveConfig();
                     }
                     else
                     {
                         PluginConfig.favouriteSongs.Add(selectedLevel.levelId);
-                        PluginConfig.SaveConfig();
                     }
+                    BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(selectedLevel.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
+                    PluginConfig.SaveConfig();
                 });
             }
             else
@@ -308,6 +309,7 @@ namespace BeatSaverDownloader.PluginUI
                         PluginConfig.favouriteSongs.Add(selectedLevel.levelId);
                     }
                     BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(selectedLevel.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
+                    PluginConfig.SaveConfig();
                 });
             }
 
