@@ -13,10 +13,12 @@ namespace BeatSaverDownloader
 
         public void OnApplicationQuit()
         {
+            PluginConfig.SaveConfig();
         }
         
         public void OnApplicationStart()
         {
+            PluginConfig.LoadOrCreateConfig();
         }
 
         public void OnFixedUpdate()

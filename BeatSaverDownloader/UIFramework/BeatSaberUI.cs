@@ -62,12 +62,7 @@ namespace BeatSaverDownloader
 
         public static Button CreateUIButton(RectTransform parent, string buttonTemplate)
         {
-            if (_instance._buttonInstance == null)
-            {
-                return null;
-            }
-
-            Button btn = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == buttonTemplate)), parent, false);
+            Button btn = Instantiate(Resources.FindObjectsOfTypeAll<Button>().Last(x => (x.name == buttonTemplate)), parent, false);
             DestroyImmediate(btn.GetComponent<GameEventOnUIButtonClick>());
             btn.onClick = new Button.ButtonClickedEvent();
 

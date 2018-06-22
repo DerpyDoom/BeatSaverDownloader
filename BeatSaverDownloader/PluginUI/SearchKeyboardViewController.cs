@@ -11,19 +11,17 @@ namespace BeatSaverDownloader.PluginUI
 {
     class SearchKeyboardViewController : VRUIViewController
     {
-        BeatSaverMasterViewController _parentMasterViewController;
-
         UIKeyboard _searchKeyboard;
 
         Button _searchButton;
 
         TextMeshProUGUI _inputText;
-        public string _inputString;
+        public string _inputString = "";
+
+        public event Action<string> searchButtonPressed;
 
         protected override void DidActivate(bool firstActivation, ActivationType activationType)
         {
-            _parentMasterViewController = transform.parent.GetComponent<BeatSaverMasterViewController>();
-
             if (_searchKeyboard == null)
             {
                 _searchKeyboard = Instantiate(Resources.FindObjectsOfTypeAll<UIKeyboard>().First(), rectTransform, false);
@@ -46,12 +44,12 @@ namespace BeatSaverDownloader.PluginUI
             if(_searchButton == null)
             {
                 _searchButton = BeatSaberUI.CreateUIButton(rectTransform, "ApplyButton");
-                BeatSaberUI.SetButtonText(ref _searchButton, "Submit");
+                BeatSaberUI.SetButtonText(ref _searchButton, "Search");
                 (_searchButton.transform as RectTransform).sizeDelta = new Vector2(30f, 10f);
                 (_searchButton.transform as RectTransform).anchoredPosition = new Vector2(-15f, 5f);
                 _searchButton.onClick.RemoveAllListeners();
                 _searchButton.onClick.AddListener(delegate() {
-                    
+                    searchButtonPressed?.Invoke(_inputString);
                     DismissModalViewController(null, false);
                 });
             }
