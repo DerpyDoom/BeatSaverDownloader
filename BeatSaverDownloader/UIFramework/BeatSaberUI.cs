@@ -65,6 +65,7 @@ namespace BeatSaverDownloader
             Button btn = Instantiate(Resources.FindObjectsOfTypeAll<Button>().Last(x => (x.name == buttonTemplate)), parent, false);
             DestroyImmediate(btn.GetComponent<GameEventOnUIButtonClick>());
             btn.onClick = new Button.ButtonClickedEvent();
+            btn.name = "CustomUIButton";
 
             return btn;
         }
@@ -76,16 +77,17 @@ namespace BeatSaverDownloader
                 return null;
             }
 
-            Button _button = Instantiate(_instance._backButtonInstance, parent, false);
-            DestroyImmediate(_button.GetComponent<GameEventOnUIButtonClick>());
-            _button.onClick = new Button.ButtonClickedEvent();
+            Button btn = Instantiate(_instance._backButtonInstance, parent, false);
+            DestroyImmediate(btn.GetComponent<GameEventOnUIButtonClick>());
+            btn.onClick = new Button.ButtonClickedEvent();
+            btn.name = "CustomUIButton";
 
-            return _button;
+            return btn;
         }
 
         public static T CreateViewController<T>() where T : VRUIViewController
         {
-            T vc = new GameObject("CreatedViewController").AddComponent<T>();
+            T vc = new GameObject("CutomViewController").AddComponent<T>();
 
             vc.rectTransform.anchorMin = new Vector2(0f, 0f);
             vc.rectTransform.anchorMax = new Vector2(1f, 1f);
@@ -98,12 +100,14 @@ namespace BeatSaverDownloader
         public static GameObject CreateLoadingIndicator(Transform parent)
         {
             GameObject indicator = Instantiate(_instance._loadingIndicatorInstance, parent, false);
+            indicator.name = "CustomUILoading";
+
             return indicator;
         }
 
         public static TextMeshProUGUI CreateText(RectTransform parent, string text, Vector2 position)
         {
-            TextMeshProUGUI textMesh = new GameObject("TextMeshProUGUI_GO").AddComponent<TextMeshProUGUI>();
+            TextMeshProUGUI textMesh = new GameObject("CustomUIText").AddComponent<TextMeshProUGUI>();
             textMesh.rectTransform.SetParent(parent, false);
             textMesh.text = text;
             textMesh.fontSize = 4;
@@ -139,20 +143,20 @@ namespace BeatSaverDownloader
 
         public static void SetButtonIcon(ref Button _button, Sprite _icon)
         {
-            if (_button.GetComponentsInChildren<UnityEngine.UI.Image>().Count() > 1)
+            if (_button.GetComponentsInChildren<Image>().Count() > 1)
             {
 
-                _button.GetComponentsInChildren<UnityEngine.UI.Image>()[1].sprite = _icon;
+                _button.GetComponentsInChildren<Image>()[1].sprite = _icon;
             }
 
         }
 
         public static void SetButtonBackground(ref Button _button, Sprite _background)
         {
-            if (_button.GetComponentsInChildren<Image>().Any())
+            if (_button.GetComponentsInChildren<Image>().Count() > 0)
             {
 
-                _button.GetComponentsInChildren<UnityEngine.UI.Image>()[0].sprite = _background;
+                _button.GetComponentsInChildren<Image>()[0].sprite = _background;
             }
 
         }

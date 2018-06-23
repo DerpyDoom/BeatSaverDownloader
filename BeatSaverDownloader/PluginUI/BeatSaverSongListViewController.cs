@@ -114,7 +114,7 @@ namespace BeatSaverDownloader.PluginUI
                 if (_topButton == null)
                 {
                     _topButton = BeatSaberUI.CreateUIButton(rectTransform, "ApplyButton");
-                    BeatSaberUI.SetButtonText(ref _topButton, "Downloads");
+                    BeatSaberUI.SetButtonText(ref _topButton, "Rating");
                     BeatSaberUI.SetButtonTextSize(ref _topButton, 3f);
                     (_topButton.transform as RectTransform).sizeDelta = new Vector2(20f, 6f);
                     (_topButton.transform as RectTransform).anchoredPosition = new Vector2(-30f, 73f);
@@ -124,7 +124,7 @@ namespace BeatSaverDownloader.PluginUI
                         if (!_parentMasterViewController._loading)
                         {
                             _parentMasterViewController._loading = true;
-                            _parentMasterViewController._sortBy = "top";
+                            _parentMasterViewController._sortBy = "star";
                             _currentPage = 0;
                             _parentMasterViewController.ClearSearchInput();
                             _parentMasterViewController.GetPage(_currentPage);

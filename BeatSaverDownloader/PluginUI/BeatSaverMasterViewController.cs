@@ -42,7 +42,7 @@ namespace BeatSaverDownloader.PluginUI
         SongPreviewPlayer _songPreviewPlayer;
         public SongLoader _songLoader;
 
-        public string _sortBy = "top";
+        public string _sortBy = "star";
         private bool isLoading = false;
         public bool _loading { get { return isLoading; } set { isLoading = value; SetLoadingIndicator(isLoading); } }
         public int _selectedRow = -1;
@@ -52,10 +52,9 @@ namespace BeatSaverDownloader.PluginUI
         protected override void DidActivate(bool firstActivation, ActivationType activationType)
         {    
             _songLoader = FindObjectOfType<SongLoader>();
-
-            UpdateAlreadyDownloadedSongs();
-
-
+            
+            _alreadyDownloadedSongs = SongLoader.CustomSongInfos.Select(x => new Song(x)).ToList();
+            
             if (_songPreviewPlayer == null)
             {
                 ObjectProvider[] providers = Resources.FindObjectsOfTypeAll<ObjectProvider>().Where(x => x.name == "SongPreviewPlayerProvider").ToArray();
@@ -311,6 +310,8 @@ namespace BeatSaverDownloader.PluginUI
                 try
                 {
                     CustomSongInfo downloadedSong = GetCustomSongInfo(downloadedSongPath);
+                    
+                    _alreadyDownloadedSongs.Add(new Song(downloadedSong));
 
                     CustomLevelStaticData newLevel = null;
                     try
@@ -339,7 +340,6 @@ namespace BeatSaverDownloader.PluginUI
                     log.Exception("Can't play preview! Exception: "+e);
                 }
 
-                UpdateAlreadyDownloadedSongs();
 
                 log.Log("Downloaded!");
                 File.Delete(zipPath);
@@ -432,7 +432,11 @@ namespace BeatSaverDownloader.PluginUI
             }
             _confirmDeleteState = Prompt.NotSelected;
 
-            UpdateAlreadyDownloadedSongs();
+
+
+            log.Log($"{_alreadyDownloadedSongs.RemoveAll(x => x.Compare(_songInfo))} song removed");
+
+
             _songListViewController._songsTableView.ReloadData();
             _songListViewController._songsTableView.SelectRow(_selectedRow);
             RefreshDetails(_selectedRow);
@@ -518,18 +522,16 @@ namespace BeatSaverDownloader.PluginUI
                 GameObject _songDetailGameObject = Instantiate(Resources.FindObjectsOfTypeAll<SongDetailViewController>().First(), rectTransform, false).gameObject;
                 Destroy(_songDetailGameObject.GetComponent<SongDetailViewController>());
                 _songDetailViewController = _songDetailGameObject.AddComponent<BeatSaverSongDetailViewController>();
-
-                RefreshDetails(row);
+                
                 PushViewController(_songDetailViewController, false);
-
+                RefreshDetails(row);
             }
             else
             {
-
                 if (_viewControllers.IndexOf(_songDetailViewController) < 0)
                 {
-                    RefreshDetails(row);
                     PushViewController(_songDetailViewController, true);
+                    RefreshDetails(row);
                 }
                 else
                 {
@@ -545,51 +547,8 @@ namespace BeatSaverDownloader.PluginUI
             {
                 return;
             }
-            
-            RectTransform _levelDetails = _songDetailViewController.GetComponentsInChildren<RectTransform>().First(x => x.name == "LevelDetails");
-            _levelDetails.sizeDelta = new Vector2(44f, 20f);
-            RectTransform _yourStats = _songDetailViewController.GetComponentsInChildren<RectTransform>().First(x => x.name == "YourStats");
-            _yourStats.sizeDelta = new Vector2(44f, 18f);
-            
-            TextMeshProUGUI[] _textComponents = _songDetailViewController.GetComponentsInChildren<TextMeshProUGUI>();
 
-            try
-            {
-
-                _textComponents.First(x => x.name == "SongNameText").text = string.Format("{0}\n<size=80%>{1}</size>", HTML5Decode.HtmlDecode(_songs[row].songName), HTML5Decode.HtmlDecode(_songs[row].songSubName));
-                _textComponents.First(x => x.name == "DurationValueText").text = HTML5Decode.HtmlDecode(_songs[row].downloads);
-                _textComponents.First(x => x.name == "DurationText").text = "Downloads";
-
-                _textComponents.First(x => x.name == "BPMText").text = "Plays";
-                _textComponents.First(x => x.name == "BPMValueText").text = HTML5Decode.HtmlDecode(_songs[row].plays);
-
-                _textComponents.First(x => x.name == "NotesCountText").text = "Author";
-                _textComponents.First(x => x.name == "NotesCountValueText").text = HTML5Decode.HtmlDecode(_songs[row].authorName);
-
-                _textComponents.First(x => x.name == "NotesCountValueText").rectTransform.sizeDelta = new Vector2(16f, 3f);
-                _textComponents.First(x => x.name == "NotesCountValueText").alignment = TextAlignmentOptions.CaplineRight;
-
-                _textComponents.First(x => x.name == "Title").text = "Difficulties";
-
-                _textComponents.First(x => x.name == "HighScoreText").text = "Expert/+";
-                _textComponents.First(x => x.name == "HighScoreValueText").text = (_songs[row].difficultyLevels.Where(x => (x.difficulty == "Expert" || x.difficulty == "ExpertPlus")).Count() > 0) ? "Yes" : "No";
-
-                _textComponents.First(x => x.name == "MaxComboText").text = "Hard";
-                _textComponents.First(x => x.name == "MaxComboValueText").text = (_songs[row].difficultyLevels.Where(x => x.difficulty == "Hard").Count() > 0) ? "Yes" : "No";
-
-                _textComponents.First(x => x.name == "MaxRankText").text = "Easy/Normal";
-                _textComponents.First(x => x.name == "MaxRankText").rectTransform.sizeDelta = new Vector2(18f, 3f);
-                _textComponents.First(x => x.name == "MaxRankValueText").text = (_songs[row].difficultyLevels.Where(x => (x.difficulty == "Easy" || x.difficulty == "Normal")).Count() > 0) ? "Yes" : "No";                
-
-                if (_textComponents.Where(x => x.name == "ObstaclesCountText").Count() != 0)
-                {
-                    Destroy(_textComponents.First(x => x.name == "ObstaclesCountText").gameObject);
-                    Destroy(_textComponents.First(x => x.name == "ObstaclesCountValueText").gameObject);
-                }
-            }catch(Exception e)
-            {
-                log.Exception("EXCEPTION: "+e);
-            }
+            _songDetailViewController.UpdateContent(_songs[row]);
             
             if (_downloadButton == null)
             {
@@ -602,7 +561,6 @@ namespace BeatSaverDownloader.PluginUI
             if (IsSongAlreadyDownloaded(_songs[row]))
             {
                 BeatSaberUI.SetButtonText(ref _downloadButton, "Delete");
-                _downloadButton.interactable = true;
 
                 _downloadButton.onClick.RemoveAllListeners();
 
@@ -622,7 +580,7 @@ namespace BeatSaverDownloader.PluginUI
 
                 string _songPath = GetDownloadedSongPath(_songs[row]);
                 
-                if (!string.IsNullOrEmpty(_songPath))
+                if (string.IsNullOrEmpty(_songPath))
                 {
                     _downloadButton.interactable = false;
                 }
@@ -721,7 +679,7 @@ namespace BeatSaverDownloader.PluginUI
             {
                 yield return www;
                 tex = www.texture;
-                var newSprite = Sprite.Create(tex, new Rect(0, 0, 256, 256), Vector2.one * 0.5f, 100, 1);
+                var newSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.one * 0.5f, 100, 1);
                 _cachedSprites.Add(spritePath, newSprite);
                 obj.GetComponentsInChildren<UnityEngine.UI.Image>()[2].sprite = newSprite;
             }
@@ -780,55 +738,8 @@ namespace BeatSaverDownloader.PluginUI
                     return song.path;
                 }
             }
+
             return null;
-        }
-
-        private void UpdateAlreadyDownloadedSongs()
-        {
-            _alreadyDownloadedSongs.Clear();
-            foreach (CustomSongInfo song in RetrieveAllSongs())
-            {
-                _alreadyDownloadedSongs.Add(new Song(song));
-            }
-        }
-
-        private List<CustomSongInfo> RetrieveAllSongs()
-        {
-            var customSongInfos = new List<CustomSongInfo>();
-            var path = Environment.CurrentDirectory;
-            path = path.Replace('\\', '/');
-
-            var currentHashes = new List<string>();
-            var cachedSongs = new string[0];
-            if (Directory.Exists(path + "/CustomSongs/.cache"))
-            {
-                cachedSongs = Directory.GetDirectories(path + "/CustomSongs/.cache");
-            }
-            
-
-            var songFolders = Directory.GetDirectories(path + "/CustomSongs").ToList();
-            var songCaches = Directory.GetDirectories(path + "/CustomSongs/.cache");
-
-            foreach (var song in songFolders)
-            {
-                var results = Directory.GetFiles(song, "info.json", SearchOption.AllDirectories);
-                if (results.Length == 0)
-                {
-                    log.Log("Custom song folder '" + song + "' is missing info.json!");
-                    continue;
-                }
-
-                foreach (var result in results)
-                {
-                    var songPath = Path.GetDirectoryName(result).Replace('\\', '/');
-                    var customSong = GetCustomSongInfo(songPath);
-                    if (customSong == null) continue;
-                    customSongInfos.Add(customSong);
-                }
-            }
-
-
-            return customSongInfos;
         }
 
         private CustomSongInfo GetCustomSongInfo(string _songPath)

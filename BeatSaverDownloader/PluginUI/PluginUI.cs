@@ -83,6 +83,7 @@ namespace BeatSaverDownloader.PluginUI
             playerId = ReflectionUtil.GetPrivateField<string>(PersistentSingleton<PlatformLeaderboardsModel>.instance, "_playerId");
             
             StartCoroutine(_votingUI.WaitForResults());
+            _votingUI.continuePressed += _votingUI_continuePressed;
             StartCoroutine(WaitForSongListUI());
 
             _levelCollections = Resources.FindObjectsOfTypeAll<LevelCollectionsForGameplayModes>().FirstOrDefault();
@@ -104,106 +105,23 @@ namespace BeatSaverDownloader.PluginUI
                 log.Exception("EXCEPTION ON AWAKE(TRY CREATE BUTTON): " + e);
             }
         }
-
+        
         private IEnumerator WaitForSongListUI()
         {
             log.Log("Waiting for song list...");
 
-            yield return new WaitUntil(delegate() { return Resources.FindObjectsOfTypeAll<SongListViewController>().Count() > 0; });
+            yield return new WaitUntil(delegate () { return Resources.FindObjectsOfTypeAll<SongListViewController>().Count() > 0; });
 
             _tweaks.SongListUIFound();
 
             log.Log("Found song list!");
-
-            if (_songDetailViewController == null)
-            {
-                _songDetailViewController = ReflectionUtil.GetPrivateField<SongDetailViewController>(_levelSelectionFlowCoordinator, "_songDetailViewController");
-            }
-
-            if (_deleteButton == null)
-            {
-                _deleteButton = BeatSaberUI.CreateUIButton(_songDetailViewController.rectTransform, "PlayButton");
-
-                BeatSaberUI.SetButtonText(ref _deleteButton, "Delete");
-
-                (_deleteButton.transform as RectTransform).anchoredPosition = new Vector2(27f, 6f);
-                (_deleteButton.transform as RectTransform).sizeDelta = new Vector2(18f, 10f);
-
-
-                _deleteButton.onClick.RemoveAllListeners();
-                _deleteButton.onClick.AddListener(delegate ()
-                {
-                    StartCoroutine(DeleteSong(_songDetailViewController.difficultyLevel.level.levelId));
-                });
-                if (_songDetailViewController.difficultyLevel.level.levelId.Length <= 32)
-                {
-                    _deleteButton.interactable = false;
-                }
-            }
-            
-
-            if (_playButton == null)
-            {
-                _playButton = _songDetailViewController.GetComponentInChildren<Button>();
-                (_playButton.transform as RectTransform).sizeDelta = new Vector2(30f, 10f);
-                (_playButton.transform as RectTransform).anchoredPosition = new Vector2(2f, 6f);
-            }
-
-            if (_favButton == null)
-            {
-                _favButton = BeatSaberUI.CreateUIButton(_songDetailViewController.rectTransform, "ApplyButton");
-
-                RectTransform iconTransform = _favButton.GetComponentsInChildren<RectTransform>(true).First(x => x.name == "Icon");
-                iconTransform.gameObject.SetActive(true);
-                Destroy(iconTransform.parent.GetComponent<HorizontalLayoutGroup>());
-                iconTransform.sizeDelta = new Vector2(8f, 8f);
-
-                Destroy(_favButton.GetComponentsInChildren<RectTransform>(true).First(x => x.name == "Text").gameObject);
-
-                BeatSaberUI.SetButtonText(ref _favButton, "");
-                BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(_songDetailViewController.difficultyLevel.level.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
-                (_favButton.transform as RectTransform).anchoredPosition = new Vector2(-24f, 6f);
-                (_favButton.transform as RectTransform).sizeDelta = new Vector2(10f, 10f);
-
-                _favButton.onClick.RemoveAllListeners();
-                _favButton.onClick.AddListener(delegate ()
-                {
-                    if(PluginConfig.favouriteSongs.Contains(_songDetailViewController.difficultyLevel.level.levelId))
-                    {
-
-                        PluginConfig.favouriteSongs.Remove(_songDetailViewController.difficultyLevel.level.levelId);
-                    }
-                    else
-                    {
-                        PluginConfig.favouriteSongs.Add(_songDetailViewController.difficultyLevel.level.levelId);
-                    }
-                    BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(_songDetailViewController.difficultyLevel.level.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
-                    PluginConfig.SaveConfig();
-                });
-            }
-            else
-            {
-                BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(_songDetailViewController.difficultyLevel.level.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
-
-                _favButton.onClick.RemoveAllListeners();
-                _favButton.onClick.AddListener(delegate ()
-                {
-                    if (PluginConfig.favouriteSongs.Contains(_songDetailViewController.difficultyLevel.level.levelId))
-                    {
-
-                        PluginConfig.favouriteSongs.Remove(_songDetailViewController.difficultyLevel.level.levelId);
-                    }
-                    else
-                    {
-                        PluginConfig.favouriteSongs.Add(_songDetailViewController.difficultyLevel.level.levelId);
-                    }
-                    BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(_songDetailViewController.difficultyLevel.level.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
-                    PluginConfig.SaveConfig();
-                });
-            }
-
         }
 
+        private void _votingUI_continuePressed(ResultsViewController sender)
+        {
+            PluginUI_didSelectSongEvent(null, sender.difficultyLevel.level);
+        }
+        
         private void PluginUI_didSelectSongEvent(SongListViewController sender, ILevel selectedLevel)
         {
             if (_deleting)

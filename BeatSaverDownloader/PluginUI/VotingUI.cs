@@ -16,6 +16,8 @@ namespace BeatSaverDownloader.PluginUI
 
         private Logger log = new Logger("BeatSaverDownloader");
 
+        public event Action<ResultsViewController> continuePressed;
+
         Button upvoteButton;
         Button downvoteButton;
         TextMeshProUGUI ratingText;
@@ -30,6 +32,8 @@ namespace BeatSaverDownloader.PluginUI
             log.Log("Found results view controller!");
 
             ResultsViewController results = Resources.FindObjectsOfTypeAll<ResultsViewController>().First();
+
+            results.continueButtonPressedEvent += continuePressed;
 
             log.Log($"Player ID: {PluginUI.playerId}");
             log.Log($"Level ID: {results.difficultyLevel.level.levelId}");
