@@ -190,43 +190,43 @@ namespace BeatSaverDownloader.PluginUI
                 Destroy(_favButton.GetComponentsInChildren<RectTransform>(true).First(x => x.name == "Text").gameObject);
 
                 BeatSaberUI.SetButtonText(ref _favButton, "");
-                BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(selectedLevel.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
+                BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favoriteSongs.Contains(selectedLevel.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
                 (_favButton.transform as RectTransform).anchoredPosition = new Vector2(-24f, 6f);
                 (_favButton.transform as RectTransform).sizeDelta = new Vector2(10f, 10f);
 
                 _favButton.onClick.RemoveAllListeners();
                 _favButton.onClick.AddListener(delegate ()
                 {
-                    if (PluginConfig.favouriteSongs.Contains(selectedLevel.levelId))
+                    if (PluginConfig.favoriteSongs.Contains(selectedLevel.levelId))
                     {
 
-                        PluginConfig.favouriteSongs.Remove(selectedLevel.levelId);
+                        PluginConfig.favoriteSongs.Remove(selectedLevel.levelId);
                     }
                     else
                     {
-                        PluginConfig.favouriteSongs.Add(selectedLevel.levelId);
+                        PluginConfig.favoriteSongs.Add(selectedLevel.levelId);
                     }
-                    BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(selectedLevel.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
+                    BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favoriteSongs.Contains(selectedLevel.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
                     PluginConfig.SaveConfig();
                 });
             }
             else
             {
-                BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(selectedLevel.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
+                BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favoriteSongs.Contains(selectedLevel.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
 
                 _favButton.onClick.RemoveAllListeners();
                 _favButton.onClick.AddListener(delegate ()
                 {
-                    if (PluginConfig.favouriteSongs.Contains(selectedLevel.levelId))
+                    if (PluginConfig.favoriteSongs.Contains(selectedLevel.levelId))
                     {
 
-                        PluginConfig.favouriteSongs.Remove(selectedLevel.levelId);
+                        PluginConfig.favoriteSongs.Remove(selectedLevel.levelId);
                     }
                     else
                     {
-                        PluginConfig.favouriteSongs.Add(selectedLevel.levelId);
+                        PluginConfig.favoriteSongs.Add(selectedLevel.levelId);
                     }
-                    BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favouriteSongs.Contains(selectedLevel.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
+                    BeatSaberUI.SetButtonIcon(ref _favButton, Base64ToSprite(PluginConfig.favoriteSongs.Contains(selectedLevel.levelId) ? Base64Sprites.RemoveFromFavorites : Base64Sprites.AddToFavorites));
                     PluginConfig.SaveConfig();
                 });
             }

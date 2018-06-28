@@ -150,7 +150,7 @@ namespace BeatSaverDownloader.PluginUI
             if (www.isNetworkError || www.isHttpError)
             {
                 log.Error(www.error);
-                TextMeshProUGUI _errorText = BeatSaberUI.CreateText(rectTransform, String.Format("Request timed out"), new Vector2(0f, -48f));
+                TextMeshProUGUI _errorText = BeatSaberUI.CreateText(rectTransform, www.error, new Vector2(0f, -48f));
                 _errorText.alignment = TextAlignmentOptions.Center;
                 Destroy(_errorText.gameObject, 2f);
             }
@@ -344,14 +344,16 @@ namespace BeatSaverDownloader.PluginUI
                 log.Log("Downloaded!");
                 File.Delete(zipPath);
 
-                if (_songs[_selectedRow].Compare(songInfo))
-                {
-                    RefreshDetails(_selectedRow);
-                }
+                
                 _songListViewController._songsTableView.ReloadData();
                 _songListViewController._songsTableView.SelectRow(_selectedRow);
             }
-            
+
+            if (_songs[_selectedRow].Compare(songInfo))
+            {
+                RefreshDetails(_selectedRow);
+            }
+
         }
 
         IEnumerator DeleteSong(Song _songInfo)

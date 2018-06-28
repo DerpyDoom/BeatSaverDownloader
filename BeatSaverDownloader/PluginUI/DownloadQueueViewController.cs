@@ -50,10 +50,11 @@ namespace BeatSaverDownloader.PluginUI
 
                     _queuedSongsTableView.didSelectRowEvent += _queuedSongsTableView_DidSelectRowEvent;
                 }
-                else
-                {
-                    _queuedSongsTableView.ReloadData();
-                }
+            }
+            else
+            {
+
+                _queuedSongsTableView.ReloadData();
             }
         }
 

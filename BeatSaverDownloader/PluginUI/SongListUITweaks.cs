@@ -179,7 +179,7 @@ namespace BeatSaverDownloader.PluginUI
 
             if (onlyFavorites)
             {
-                SetSongListLevels(PluginUI._levelCollections.GetLevels(gameplayMode).Where(x => PluginConfig.favouriteSongs.Contains(x.levelId)).ToArray());
+                SetSongListLevels(PluginUI._levelCollections.GetLevels(gameplayMode).Where(x => PluginConfig.favoriteSongs.Contains(x.levelId)).ToArray());
             }
             else
             {
