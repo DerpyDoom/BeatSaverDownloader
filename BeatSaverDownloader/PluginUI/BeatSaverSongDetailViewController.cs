@@ -28,11 +28,12 @@ namespace BeatSaverDownloader.PluginUI
             if (firstActivation)
             {
                 RemoveCustomUIElements(rectTransform);
-
+                
                 RectTransform _levelDetails = GetComponentsInChildren<RectTransform>().First(x => x.name == "LevelDetails");
                 _levelDetails.sizeDelta = new Vector2(44f, 20f);
-                RectTransform _yourStats = GetComponentsInChildren<RectTransform>().First(x => x.name == "YourStats");
+                RectTransform _yourStats = GetComponentsInChildren<RectTransform>(true).First(x => x.name == "YourStats");
                 _yourStats.sizeDelta = new Vector2(44f, 18f);
+                _yourStats.gameObject.SetActive(true);
 
                 TextMeshProUGUI[] _textComponents = GetComponentsInChildren<TextMeshProUGUI>();
 
