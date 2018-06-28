@@ -8,6 +8,8 @@ using SongLoaderPlugin;
 namespace BeatSaverDownloader
 {
 
+    public enum SongQueueState { Available, Queued, Downloading, Downloaded, Error }; 
+
     [Serializable]
     public class DifficultyLevel
     {
@@ -58,6 +60,10 @@ namespace BeatSaverDownloader
         public string img;
 
         public string path;
+
+        public SongQueueState songQueueState = SongQueueState.Available;
+
+        public float downloadingProgress = 0f;
 
         public Song(JSONNode jsonNode)
         {

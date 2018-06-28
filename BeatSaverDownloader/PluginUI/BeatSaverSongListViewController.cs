@@ -1,4 +1,5 @@
-﻿using HMUI;
+﻿using BeatSaverDownloader.Misc;
+using HMUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -327,7 +328,7 @@ namespace BeatSaverDownloader.PluginUI
 
             _tableCell.songName = string.Format("{0}\n<size=80%>{1}</size>", HTML5Decode.HtmlDecode(_parentMasterViewController._songs[row].songName), HTML5Decode.HtmlDecode(_parentMasterViewController._songs[row].songSubName));
             _tableCell.author = HTML5Decode.HtmlDecode(_parentMasterViewController._songs[row].authorName);
-            StartCoroutine(_parentMasterViewController.LoadSprite("https://beatsaver.com/img/" + _parentMasterViewController._songs[row].id + "." + _parentMasterViewController._songs[row].img, _tableCell));
+            StartCoroutine(LoadScripts.LoadSprite("https://beatsaver.com/img/" + _parentMasterViewController._songs[row].id + "." + _parentMasterViewController._songs[row].img, _tableCell));
 
             bool alreadyDownloaded = _parentMasterViewController.IsSongAlreadyDownloaded(_parentMasterViewController._songs[row]);
 

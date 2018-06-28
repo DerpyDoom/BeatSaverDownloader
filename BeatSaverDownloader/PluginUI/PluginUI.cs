@@ -106,6 +106,14 @@ namespace BeatSaverDownloader.PluginUI
             }
         }
         
+        public void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                PluginConfig.LoadOrCreateConfig();
+            }
+        }
+
         private IEnumerator WaitForSongListUI()
         {
             log.Log("Waiting for song list...");

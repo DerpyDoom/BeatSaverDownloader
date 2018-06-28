@@ -1,4 +1,5 @@
-﻿using HMUI;
+﻿using BeatSaverDownloader.Misc;
+using HMUI;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using SimpleJSON;
@@ -31,8 +32,6 @@ namespace BeatSaverDownloader.PluginUI
 
         public List<Song> _songs = new List<Song>();
         public List<Song> _alreadyDownloadedSongs = new List<Song>();
-
-        public Dictionary<string, Sprite> _cachedSprites = new Dictionary<string, Sprite>();
 
         private List<LevelStaticData> _notUpdatedSongs = new List<LevelStaticData>();
 
@@ -142,7 +141,7 @@ namespace BeatSaverDownloader.PluginUI
             _loading = true;
 
             UnityWebRequest www = UnityWebRequest.Get(String.Format("https://beatsaver.com/api.php?mode={0}&off={1}", sortBy, (page * _songListViewController._songsPerPage)));
-            www.timeout = 10;
+            www.timeout = 30;
             yield return www.SendWebRequest();
 
             
@@ -195,7 +194,7 @@ namespace BeatSaverDownloader.PluginUI
             _songListViewController._songsTableView.ReloadData();
 
             UnityWebRequest www = UnityWebRequest.Get(String.Format("https://beatsaver.com/search.php?q={0}", search));
-            www.timeout = 10;
+            www.timeout = 30;
             yield return www.SendWebRequest();
 
             
@@ -257,22 +256,55 @@ namespace BeatSaverDownloader.PluginUI
                 RefreshDetails(_selectedRow);
             }
 
+            songInfo.songQueueState = SongQueueState.Downloading;
+
             string downloadedSongPath = "";
 
             UnityWebRequest www = UnityWebRequest.Get("https://beatsaver.com/dl.php?id=" + (songInfo.id));
-            www.timeout = 10;
-            yield return www.SendWebRequest();
 
-            log.Log("Received response from BeatSaver.com...");
+            bool timeout = false;
+            float time = 0f;
 
-            if (www.isNetworkError || www.isHttpError)
+            UnityWebRequestAsyncOperation asyncRequest = www.SendWebRequest();
+
+            while (!asyncRequest.isDone || asyncRequest.progress < 1f)
             {
-                log.Error(www.error);
-                TextMeshProUGUI _errorText = BeatSaberUI.CreateText(_songDetailViewController.rectTransform, www.error, new Vector2(18f, -64f));
-                Destroy(_errorText.gameObject, 2f);
+                yield return null;
+
+                time += Time.deltaTime;
+
+                if(time >= 15f && asyncRequest.progress == 0f)
+                {
+                    www.Abort();
+                    timeout = true;
+                }
+
+                songInfo.downloadingProgress = asyncRequest.progress;
+            }
+
+
+            if (www.isNetworkError || www.isHttpError || timeout)
+            {
+                if (timeout)
+                {
+                    songInfo.songQueueState = SongQueueState.Error;
+                    TextMeshProUGUI _errorText = BeatSaberUI.CreateText(_songDetailViewController.rectTransform, "Request timeout", new Vector2(18f, -64f));
+                    Destroy(_errorText.gameObject, 2f);
+                }
+                else
+                {
+                    songInfo.songQueueState = SongQueueState.Error;
+                    log.Error($"Downloading error: {www.error}");
+                    TextMeshProUGUI _errorText = BeatSaberUI.CreateText(_songDetailViewController.rectTransform, www.error, new Vector2(18f, -64f));
+                    Destroy(_errorText.gameObject, 2f);
+                }
+                
             }
             else
             {
+
+                log.Log("Received response from BeatSaver.com...");
+
                 string zipPath = "";
                 string docPath = "";
                 string customSongsPath = "";
@@ -293,6 +325,7 @@ namespace BeatSaverDownloader.PluginUI
                 }catch(Exception e)
                 {
                     log.Exception("EXCEPTION: "+e);
+                    songInfo.songQueueState = SongQueueState.Error;
                     yield break;
                 }
                 
@@ -331,7 +364,7 @@ namespace BeatSaverDownloader.PluginUI
                     ReflectionUtil.SetPrivateField(newLevel, "_previewDuration", downloadedSong.previewDuration);
                     ReflectionUtil.SetPrivateField(newLevel, "_beatsPerMinute", downloadedSong.beatsPerMinute);
 
-                    StartCoroutine(LoadAudio("file://" + downloadedSong.path + "/" + downloadedSong.audioPath, newLevel, "audioClip"));
+                    StartCoroutine(LoadScripts.LoadAudio("file://" + downloadedSong.path + "/" + downloadedSong.audioPath, newLevel, "audioClip"));
 
                     newLevel.OnEnable();
                     _notUpdatedSongs.Add(newLevel);
@@ -344,7 +377,9 @@ namespace BeatSaverDownloader.PluginUI
                 log.Log("Downloaded!");
                 File.Delete(zipPath);
 
-                
+
+                songInfo.songQueueState = SongQueueState.Downloaded;
+
                 _songListViewController._songsTableView.ReloadData();
                 _songListViewController._songsTableView.SelectRow(_selectedRow);
             }
@@ -664,35 +699,6 @@ namespace BeatSaverDownloader.PluginUI
                 {
                     log.Error("Can't play preview! Exception: " + e);
                 }
-            }
-        }
-
-        public IEnumerator LoadSprite(string spritePath, TableCell obj)
-        {
-            Texture2D tex;
-
-            if (_cachedSprites.ContainsKey(spritePath))
-            {
-                obj.GetComponentsInChildren<UnityEngine.UI.Image>()[2].sprite = _cachedSprites[spritePath];
-                yield break;
-            }
-
-            using (WWW www = new WWW(spritePath))
-            {
-                yield return www;
-                tex = www.texture;
-                var newSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.one * 0.5f, 100, 1);
-                _cachedSprites.Add(spritePath, newSprite);
-                obj.GetComponentsInChildren<UnityEngine.UI.Image>()[2].sprite = newSprite;
-            }
-        }        
-
-        private IEnumerator LoadAudio(string audioPath, object obj, string fieldName)
-        {
-            using (var www = new WWW(audioPath))
-            {
-                yield return www;
-                ReflectionUtil.SetPrivateField(obj, fieldName, www.GetAudioClip(true, true, AudioType.UNKNOWN));
             }
         }
 

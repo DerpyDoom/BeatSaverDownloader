@@ -53,8 +53,7 @@ namespace BeatSaverDownloader.PluginUI
             }
             else
             {
-
-                _queuedSongsTableView.ReloadData();
+                Refresh();
             }
         }
 
@@ -71,7 +70,10 @@ namespace BeatSaverDownloader.PluginUI
         public void EnqueueSong(Song song)
         {
             _queuedSongs.Add(song);
-            _queuedSongsTableView.ReloadData();
+            song.songQueueState = SongQueueState.Queued;
+
+            Refresh();
+
 
             StartCoroutine(DownloadSongFromQueue(song));
         }
@@ -81,6 +83,15 @@ namespace BeatSaverDownloader.PluginUI
             yield return _parentMasterViewController.DownloadSongCoroutine(song);
 
             _queuedSongs.Remove(song);
+            song.songQueueState = SongQueueState.Available;
+            Refresh();
+        }
+
+        public void Refresh()
+        {
+            int removed = _queuedSongs.RemoveAll(x => x.songQueueState != SongQueueState.Downloading && x.songQueueState != SongQueueState.Queued);
+
+            Logger.StaticLog($"Removed {removed} songs from queue");
 
             _queuedSongsTableView.ReloadData();
         }
@@ -99,11 +110,11 @@ namespace BeatSaverDownloader.PluginUI
         {
             SongListTableCell _tableCell = Instantiate(_songListTableCellInstance);
 
-            _tableCell.songName = string.Format("{0}\n<size=80%>{1}</size>", HTML5Decode.HtmlDecode(_queuedSongs[row].songName), HTML5Decode.HtmlDecode(_queuedSongs[row].songSubName));
-            _tableCell.author = HTML5Decode.HtmlDecode(_queuedSongs[row].authorName);
-            StartCoroutine(_parentMasterViewController.LoadSprite("https://beatsaver.com/img/" + _queuedSongs[row].id + "." + _queuedSongs[row].img, _tableCell));
+            DownloadQueueTableCell _queueCell = _tableCell.gameObject.AddComponent<DownloadQueueTableCell>();
 
-            return _tableCell;
+            _queueCell.Init(_queuedSongs[row]);
+            
+            return _queueCell;
         }
     }
 }
