@@ -159,6 +159,7 @@
     <Compile Include="ICSharpCode.SharpZipLib\Zip\ZipOutputStream.cs" />
     <Compile Include="Misc\Logger.cs" />
     <Compile Include="Plugin.cs" />
+    <Compile Include="PluginUI\CustomUIKeyboard.cs" />
     <Compile Include="PluginUI\DownloadQueueTableCell.cs" />
     <Compile Include="PluginUI\DownloadQueueViewController.cs" />
     <Compile Include="PluginUI\PluginUI.cs" />
